@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diabetes Prediction Application</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="icon" href="{{ url_for('static', filename='images.jpeg') }}">
+</head>
+<body>
+    <div class="container">
+        <form id="diabetesForm">
+            <h2>Diabetes Prediction Application</h2>
+
+            <div class="form-grid">
+                <div>
+                    <label for="pregnancies">Pregnancies:</label>
+                    <input type="number" id="pregnancies" name="pregnancies" required>
+                </div>
+
+                <div>
+                    <label for="glucose">Glucose:</label>
+                    <input type="number" id="glucose" name="glucose" required>
+                </div>
+
+                <div>
+                    <label for="bloodPressure">Blood Pressure:</label>
+                    <input type="number" id="bloodPressure" name="bloodPressure" required>
+                </div>
+
+                <div>
+                    <label for="skinThickness">Skin Thickness:</label>
+                    <input type="number" id="skinThickness" name="skinThickness" required>
+                </div>
+
+                <div>
+                    <label for="insulin">Insulin:</label>
+                    <input type="number" id="insulin" name="insulin" required>
+                </div>
+
+                <div>
+                    <label for="bmi">BMI:</label>
+                    <input type="number" step="0.1" id="bmi" name="bmi" required>
+                </div>
+
+                <div>
+                    <label for="dpf">Diabetes Pedigree Function:</label>
+                    <input type="number" step="0.01" id="dpf" name="dpf" required>
+                </div>
+
+                <div>
+                    <label for="age">Age:</label>
+                    <input type="number" id="age" name="age" required>
+                </div>
+
+                <button type="button" onclick="submitForm()">Predict</button>
+            </div>
+        </form>
+
+        <div id="result"></div>
+    </div>
+
+    <script>
+        function submitForm() {
+            const form = document.getElementById('diabetesForm');
+
+            const formData = new FormData(form);
+            let isFormValid = true;
+
+            formData.forEach((value) => {
+                if (value === "") {
+                    isFormValid = false;
+                }
+            });
+
+            if (!isFormValid) {
+                alert('Please fill out all fields.');
+                return;
+            }
+
+            
+
+            const data = {
+                pregnancies: formData.get('pregnancies'),
+                glucose: formData.get('glucose'),
+                bloodPressure: formData.get('bloodPressure'),
+                skinThickness: formData.get('skinThickness'),
+                insulin: formData.get('insulin'),
+                bmi: formData.get('bmi'),
+                dpf: formData.get('dpf'),
+                age: formData.get('age')
+            };
+
+            fetch('/predict', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.error) {
+                    // Handle server-side validation error
+                    console.error('Server error:', result.error);
+                    return;
+                }
+                document.getElementById('result').innerText =  (result.prediction === 1 ? 'Yes' : 'No');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+    </script>
+</body>
+</html>
